@@ -44,7 +44,7 @@ export default function Modal({
           </button>
           <button
             onClick={onConfirm}
-            className='w-full h-[50px] px-[20px] py-[12px] rounded-[10px] bg-purple-50 text-headline1 font-bold text-white'
+            className='w-full h-[50px] px-[20px] py-[12px] rounded-[10px] bg-blue-500 text-headline1 font-bold text-white'
           >
             확인
           </button>
