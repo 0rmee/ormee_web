@@ -31,7 +31,7 @@ export default function Modal({
       <div className={`bg-white rounded-[15px] px-[30px] py-[20px] ${containerStyle}`}>
         <div className='flex flex-col w-full gap-[13px]'>
           <p>스토리북 preview 댓글 체크! 이게 보인다면 프리뷰를 잘 받아온 겁니다</p>
-          <p>댓글 갱신되도록 workflow 수정 후</p>
+          <p>PR 댓글 이벤트 변경 후 테스트</p>
           {title && <h2 className='text-heading1 font-semibold text-gray-90 text-center'>{title}</h2>}
           {description && <p className='text-headline2 font-normal text-gray-90 text-center'>{description}</p>}
         </div>
