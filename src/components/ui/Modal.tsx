@@ -40,13 +40,13 @@ export default function Modal({
             onClick={onCancel}
             className='w-full h-[50px] px-[20px] py-[12px] rounded-[10px] bg-gray-20 text-headline1 font-bold text-gray-60'
           >
-            취소
+            취소하기
           </button>
           <button
             onClick={onConfirm}
             className='w-full h-[50px] px-[20px] py-[12px] rounded-[10px] bg-blue-500 text-headline1 font-bold text-white'
           >
-            확인
+            확인하기
           </button>
         </div>
       </div>
