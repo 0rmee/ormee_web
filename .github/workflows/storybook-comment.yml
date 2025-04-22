@@ -1,51 +1,43 @@
-name: PR Storybook Preview Link via Vercel API
+name: Comment Storybook Preview on PR
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  repository_dispatch:
+    types: [storybook_preview_ready]
 
 jobs:
   comment:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 브랜치 이름 가져오기
-      - name: Get branch name
-        id: get_branch
-        run: echo "branch=${GITHUB_HEAD_REF}" >> $GITHUB_OUTPUT
+      - name: Extract branch name
+        id: vars
+        run: echo "branch=${{ github.event.client_payload.branch }}" >> $GITHUB_OUTPUT
 
-      # 2️⃣ Vercel API 호출 + 디버그 JSON 저장 + Preview URL 추출
-      - name: Query Vercel for deployment URL (preview only)
+      - name: Query Vercel for preview deployment
         id: vercel
         run: |
-          BRANCH=${{ steps.get_branch.outputs.branch }}
-          echo "🔍 Looking for preview deployment of branch: $BRANCH"
+          BRANCH=${{ steps.vars.outputs.branch }}
+          for i in {1..5}; do
+            RESPONSE=$(curl -s -G "https://api.vercel.com/v6/deployments" \
+              --data-urlencode "projectId=${{ secrets.VERCEL_PROJECT_ID }}" \
+              --data-urlencode "meta.githubCommitRef=$BRANCH" \
+              --data-urlencode "target=preview" \
+              -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}")
 
-          # Vercel API 호출 (preview만 조회)
-          RESPONSE=$(curl -s -G "https://api.vercel.com/v6/deployments" \
-            --data-urlencode "projectId=${{ secrets.VERCEL_PROJECT_ID }}" \
-            --data-urlencode "meta.githubCommitRef=$BRANCH" \
-            --data-urlencode "target=preview" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}")
+            echo "$RESPONSE" > response.json
 
-          echo "$RESPONSE" > vercel_response.json
+            URL=$(jq -r '.deployments[] | select(.state == "READY") | .url' response.json | head -n 1)
 
-          # 디버깅용 출력 (요약)
-          echo "📦 Vercel API Response (truncated):"
-          echo "$RESPONSE" | jq '.deployments[] | {url, state, created, target}' | head -n 30
+            if [ "$URL" != "" ]; then
+              echo "Found preview: $URL"
+              echo "preview_url=https://$URL" >> $GITHUB_OUTPUT
+              break
+            else
+              echo "No preview ready yet... retrying"
+              sleep 5
+            fi
+          done
 
-          # 가장 최신 preview 배포의 주소 추출
-          URL=$(jq -r '.deployments[0].url' < vercel_response.json)
-
-          if [ "$URL" = "null" ] || [ -z "$URL" ]; then
-            echo "⚠️ No preview deployment found for branch $BRANCH"
-            echo "preview_url=" >> $GITHUB_OUTPUT
-          else
-            echo "✅ Found preview deployment: $URL"
-            echo "preview_url=https://$URL" >> $GITHUB_OUTPUT
-          fi
-
-      # 3️⃣ PR에 댓글 남기기
       - name: Post Storybook Preview comment
         if: ${{ steps.vercel.outputs.preview_url != '' }}
         uses: marocchino/sticky-pull-request-comment@v2
