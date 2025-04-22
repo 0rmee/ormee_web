@@ -28,9 +28,9 @@ export default function Modal({
 
   return (
     <div className='fixed inset-0 bg-gray-90/50 flex justify-center items-center z-50'>
-      <p>스토리북 댓글 체크용입니다</p>
       <div className={`bg-white rounded-[15px] px-[30px] py-[20px] ${containerStyle}`}>
         <div className='flex flex-col w-full gap-[13px]'>
+          <p>스토리북 preview 댓글 체크! 이게 보인다면 프리뷰를 잘 받아온 겁니다</p>
           {title && <h2 className='text-heading1 font-semibold text-gray-90 text-center'>{title}</h2>}
           {description && <p className='text-headline2 font-normal text-gray-90 text-center'>{description}</p>}
         </div>
