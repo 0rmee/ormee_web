@@ -9,26 +9,32 @@ on:
       - 'refactor/*'
 
 jobs:
-  sync:
+  sync-to-fork:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout source repo
+        uses: actions/checkout@v2
 
-      - name: Prepare output
+      - name: Prepare full project copy into output/
+        shell: bash
         run: |
+          echo "📁 Copying full project (excluding .git, output, etc)"
           mkdir -p output
-          sh ./build.sh
-          cp -r .storybook output/.storybook
-          cp -r components output/components
-          cp -r lib output/lib
+          shopt -s dotglob extglob
+          cp -r !(output|.git) output/
+          rm -rf output/.git
 
-      - name: Clone fork repo and copy .github
+      - name: Copy .github from fork repo (preserve workflows)
         env:
           TOKEN: ${{ secrets.FORKED_REPO_KEY }}
         run: |
-          git clone --depth=1 --branch ${{ github.ref_name }} https://x-access-token:$TOKEN@github.com/nninyeong/ormee_web.git fork-repo
-          cp -r fork-repo/.github output/.github
+          echo "🔁 Cloning forked repo branch: ${{ github.ref_name }}"
+          git clone --depth=1 --branch ${{ github.ref_name }} https://x-access-token:$TOKEN@github.com/nninyeong/ormee_web.git fork
+
+          echo "🛠 Replacing .github with fork's version"
+          rm -rf output/.github
+          cp -r fork/.github output/.github || echo "⚠️ No .github in fork repo yet"
 
       - name: Push to forked repo
         uses: cpina/github-action-push-to-another-repository@main
