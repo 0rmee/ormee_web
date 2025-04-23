@@ -9,8 +9,9 @@ on:
       - 'refactor/*'
 
 jobs:
-  build:
+  sync:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
@@ -19,8 +20,17 @@ jobs:
           mkdir -p output
           sh ./build.sh
           cp -r .storybook output/.storybook
+          cp -r components output/components
+          cp -r lib output/lib
 
-      - name: Push to forked repo (same branch)
+      - name: Clone fork repo and copy .github
+        env:
+          TOKEN: ${{ secrets.FORKED_REPO_KEY }}
+        run: |
+          git clone --depth=1 --branch ${{ github.ref_name }} https://x-access-token:$TOKEN@github.com/nninyeong/ormee_web.git fork-repo
+          cp -r fork-repo/.github output/.github
+
+      - name: Push to forked repo
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.FORKED_REPO_KEY }}
