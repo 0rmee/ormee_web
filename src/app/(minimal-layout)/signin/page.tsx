@@ -42,6 +42,8 @@ export default function SignInPage() {
           src='/assets/images/brand/logo.png'
           alt='오르미 로고'
           draggable={false}
+          width={160}
+          height={29.79}
         />
         <h1 className='text-gray-70 text-heading2 font-semibold'>체계적인 수업 관리 서비스 오르미</h1>
       </div>
@@ -57,6 +59,7 @@ export default function SignInPage() {
           <Input
             name='password'
             control={control}
+            size='w-full h-[50px]'
             placeholder='비밀번호'
             type='password'
             showPasswordToggle
